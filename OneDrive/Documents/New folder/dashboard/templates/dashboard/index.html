@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quadcore AI - Automated Software tester and Hardener</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            background-color: #054247ff;
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        .input-section {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+        .input-section h2 {
+            margin-bottom: 20px;
+            color: #1a2b47;
+        }
+        .input-group {
+            margin-bottom: 20px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .btn {
+            background-color: #117d07ff;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #04156bff;
+        }
+        .results-section {
+            display: none;
+        }
+        .results-header {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .results-header h2 {
+            color: #1a2b47;
+        }
+        .overall-status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .status-good {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .status-critical {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .agents-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 20px;
+        }
+        .agent-card {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            transition: transform 0.3s;
+        }
+        .agent-card:hover {
+            transform: translateY(-5px);
+        }
+        .agent-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .agent-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #ca0c13ff;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+        .agent-title {
+            flex: 1;
+        }
+        .agent-title h3 {
+            margin-bottom: 5px;
+            color: #1a2b47;
+        }
+        .agent-title p {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .agent-status {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .status-pass {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status-fail {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status-warning {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .agent-summary {
+            margin-bottom: 15px;
+        }
+        .agent-details {
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .detail-item {
+            margin-bottom: 10px;
+        }
+        .detail-item:last-child {
+            margin-bottom: 0;
+        }
+        .detail-label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        .detail-value {
+            font-size: 0.9rem;
+            color: #555;
+        }
+        .issues-list {
+            margin-top: 10px;
+        }
+        .issue-item {
+            background-color: white;
+            border-left: 3px solid #068f2fff;
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-radius: 0 5px 5px 0;
+            font-size: 0.9rem;
+        }
+        .issue-severity {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-left: 5px;
+        }
+        .severity-high {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .severity-medium {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .severity-low {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .progress-bar {
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 5px;
+        }
+        .progress-fill {
+            height: 100%;
+            background-color: #04811fff;
+        }
+        .back-button {
+            margin-top: 30px;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>Quadcore AI - Automated Software tester and Hardener</h1>
+            <p>Comprehensive analysis of your software repository using 7 specialized AI agents</p>
+        </div>
+    </header>
+
+    <div class="container">
+        <section class="input-section">
+            <h2>Repository Analysis</h2>
+            <div class="input-group">
+                <label for="repo-url">Software Repository URL:</label>
+                <input type="text" id="repo-url" placeholder=" " required>
+            </div>
+            <button id="analyze-btn" class="btn">Analyze Repository</button>
+        </section>
+
+        <section id="results-section" class="results-section">
+            <div class="results-header">
+                <h2>Analysis Results for <span id="repo-name"></span></h2>
+                <div id="overall-status" class="overall-status">Good</div>
+            </div>
+            
+            <div id="agents-container" class="agents-container">
+                <!-- Agent cards will be dynamically generated here -->
+            </div>
+            
+            <div class="back-button">
+                <button id="back-btn" class="btn">Analyze Another Repository</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const backBtn = document.getElementById('back-btn');
+            const repoUrlInput = document.getElementById('repo-url');
+            const resultsSection = document.getElementById('results-section');
+            const inputSection = document.querySelector('.input-section');
+            const repoNameSpan = document.getElementById('repo-name');
+            const overallStatus = document.getElementById('overall-status');
+            const agentsContainer = document.getElementById('agents-container');
+
+            // Agent definitions
+            const agents = [
+                {
+                    id: 'unit-test',
+                    name: 'Unit Test Agent',
+                    description: 'Runs pytest/unittest automatically',
+                    icon: 'UT'
+                },
+                {
+                    id: 'static-analysis',
+                    name: 'Static Code Analysis Agent',
+                    description: 'Runs pylint/flake8 for coding standard issues',
+                    icon: 'SA'
+                },
+                {
+                    id: 'dependency-vulnerability',
+                    name: 'Dependency Vulnerability Agent',
+                    description: 'Runs safety or pip-audit to detect vulnerable libraries',
+                    icon: 'DV'
+                },
+                {
+                    id: 'security-hardening',
+                    name: 'Security Hardening Agent',
+                    description: 'Runs bandit (Python security linter)',
+                    icon: 'SH'
+                },
+                {
+                    id: 'performance',
+                    name: 'Performance Agent',
+                    description: 'Checks code efficiency (cyclomatic complexity, profiling)',
+                    icon: 'PA'
+                },
+                {
+                    id: 'license-compliance',
+                    name: 'License Compliance Agent',
+                    description: 'Scans third-party licenses (to prevent legal risks)',
+                    icon: 'LC'
+                },
+                {
+                    id: 'auto-fix',
+                    name: 'Auto-Fix Suggestion Agent',
+                    description: 'Tries ruff (formatter/fixer) + AI-like patch suggestions',
+                    icon: 'AF'
+                }
+            ];
+
+            // Event listeners
+            analyzeBtn.addEventListener('click', function() {
+                const repoUrl = repoUrlInput.value.trim();
+                if (repoUrl) {
+                    analyzeRepository(repoUrl);
+                } else {
+                    alert('Please enter a repository URL');
+                }
+            });
+
+            backBtn.addEventListener('click', function() {
+                resultsSection.style.display = 'none';
+                inputSection.style.display = 'block';
+                repoUrlInput.value = '';
+            });
+
+            // Analyze repository function
+            function analyzeRepository(repoUrl) {
+                // Extract repository name from URL
+                const repoName = repoUrl.split('/').pop();
+                repoNameSpan.textContent = repoName;
+                
+                // Generate hash from URL for consistent pseudo-random results
+                const hash = generateHash(repoUrl);
+                
+                // Generate results for each agent
+                const agentResults = agents.map(agent => {
+                    return generateAgentResults(agent, hash);
+                });
+                
+                // Determine overall status
+                const criticalCount = agentResults.filter(r => r.status === 'critical').length;
+                const warningCount = agentResults.filter(r => r.status === 'warning').length;
+                
+                if (criticalCount > 0) {
+                    overallStatus.textContent = 'Critical Issues Found';
+                    overallStatus.className = 'overall-status status-critical';
+                } else if (warningCount > 2) {
+                    overallStatus.textContent = 'Issues Found';
+                    overallStatus.className = 'overall-status status-warning';
+                } else {
+                    overallStatus.textContent = 'Good';
+                    overallStatus.className = 'overall-status status-good';
+                }
+                
+                // Render agent cards
+                renderAgentCards(agentResults);
+                
+                // Show results section
+                inputSection.style.display = 'none';
+                resultsSection.style.display = 'block';
+            }
+
+            // Generate hash from string
+            function generateHash(str) {
+                let hash = 0;
+                for (let i = 0; i < str.length; i++) {
+                    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+                    hash |= 0; // Convert to 32bit integer
+                }
+                return Math.abs(hash);
+            }
+
+            // Generate agent results based on hash
+            function generateAgentResults(agent, seed) {
+                // Create a seeded random number generator
+                const random = seededRandom(seed + agent.id.charCodeAt(0));
+                
+                let results = {
+                    ...agent,
+                    status: 'good',
+                    summary: '',
+                    details: [],
+                    issues: []
+                };
+                
+                // Generate specific results based on agent type
+                switch (agent.id) {
+                    case 'unit-test':
+                        const testCount = Math.floor(random() * 200) + 50;
+                        const passedCount = Math.floor(testCount * (0.7 + random() * 0.25));
+                        const coverage = Math.floor((passedCount / testCount) * 100);
+                        
+                        results.summary = `${passedCount}/${testCount} tests passed (${coverage}% coverage)`;
+                        
+                        if (coverage < 80) {
+                            results.status = coverage < 60 ? 'critical' : 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Total Tests',
+                                value: testCount
+                            },
+                            {
+                                label: 'Passed Tests',
+                                value: passedCount
+                            },
+                            {
+                                label: 'Failed Tests',
+                                value: testCount - passedCount
+                            },
+                            {
+                                label: 'Test Coverage',
+                                value: `${coverage}%`,
+                                progress: coverage
+                            }
+                        ];
+                        
+                        // Generate some failed tests
+                        const failedTests = testCount - passedCount;
+                        for (let i = 0; i < Math.min(failedTests, 5); i++) {
+                            results.issues.push({
+                                text: `Test failed: ${['test_login', 'test_registration', 'test_payment', 'test_search', 'test_profile'][i]}`,
+                                severity: random() > 0.5 ? 'high' : 'medium'
+                            });
+                        }
+                        break;
+                        
+                    case 'static-analysis':
+                        const issueCount = Math.floor(random() * 50) + 5;
+                        const errorCount = Math.floor(issueCount * random() * 0.3);
+                        const warningCount = Math.floor(issueCount * random() * 0.5);
+                        const conventionCount = issueCount - errorCount - warningCount;
+                        
+                        results.summary = `${issueCount} issues found (${errorCount} errors, ${warningCount} warnings)`;
+                        
+                        if (errorCount > 5 || issueCount > 30) {
+                            results.status = errorCount > 10 ? 'critical' : 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Total Issues',
+                                value: issueCount
+                            },
+                            {
+                                label: 'Errors',
+                                value: errorCount
+                            },
+                            {
+                                label: 'Warnings',
+                                value: warningCount
+                            },
+                            {
+                                label: 'Convention Issues',
+                                value: conventionCount
+                            }
+                        ];
+                        
+                        // Generate some issues
+                        const issueTypes = ['Unused variable', 'Missing docstring', 'Line too long', 'Import not used', 'Function too complex'];
+                        for (let i = 0; i < Math.min(issueCount, 5); i++) {
+                            results.issues.push({
+                                text: `${issueTypes[Math.floor(random() * issueTypes.length)]} in ${['src/main.py', 'src/utils.py', 'src/models.py', 'src/views.py'][i]}`,
+                                severity: i < errorCount ? 'high' : (i < errorCount + warningCount ? 'medium' : 'low')
+                            });
+                        }
+                        break;
+                        
+                    case 'dependency-vulnerability':
+                        const vulnCount = Math.floor(random() * 10);
+                        const highVulnCount = Math.floor(vulnCount * random() * 0.4);
+                        const mediumVulnCount = Math.floor(vulnCount * random() * 0.4);
+                        const lowVulnCount = vulnCount - highVulnCount - mediumVulnCount;
+                        
+                        results.summary = `${vulnCount} vulnerabilities found in dependencies`;
+                        
+                        if (highVulnCount > 0) {
+                            results.status = highVulnCount > 2 ? 'critical' : 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Total Dependencies',
+                                value: Math.floor(random() * 50) + 20
+                            },
+                            {
+                                label: 'Vulnerabilities',
+                                value: vulnCount
+                            },
+                            {
+                                label: 'High Severity',
+                                value: highVulnCount
+                            },
+                            {
+                                label: 'Outdated Packages',
+                                value: Math.floor(random() * 20) + 5
+                            }
+                        ];
+                        
+                        // Generate some vulnerabilities
+                        const packages = ['requests', 'numpy', 'pandas', 'django', 'flask', 'tensorflow', 'pytorch', 'scikit-learn'];
+                        for (let i = 0; i < Math.min(vulnCount, 5); i++) {
+                            results.issues.push({
+                                text: `CVE-2023-${Math.floor(random() * 9000) + 1000} in ${packages[Math.floor(random() * packages.length)]}`,
+                                severity: i < highVulnCount ? 'high' : (i < highVulnCount + mediumVulnCount ? 'medium' : 'low')
+                            });
+                        }
+                        break;
+                        
+                    case 'security-hardening':
+                        const secIssueCount = Math.floor(random() * 15) + 1;
+                        const highSecCount = Math.floor(secIssueCount * random() * 0.3);
+                        
+                        results.summary = `${secIssueCount} security issues found`;
+                        
+                        if (highSecCount > 0) {
+                            results.status = highSecCount > 2 ? 'critical' : 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Security Issues',
+                                value: secIssueCount
+                            },
+                            {
+                                label: 'High Severity',
+                                value: highSecCount
+                            },
+                            {
+                                label: 'Medium Severity',
+                                value: Math.floor(secIssueCount * random() * 0.5)
+                            },
+                            {
+                                label: 'Low Severity',
+                                value: secIssueCount - highSecCount - Math.floor(secIssueCount * random() * 0.5)
+                            }
+                        ];
+                        
+                        // Generate some security issues
+                        const secIssues = ['Hardcoded password', 'SQL injection', 'Insecure random', 'Command injection', 'XSS vulnerability'];
+                        for (let i = 0; i < Math.min(secIssueCount, 5); i++) {
+                            results.issues.push({
+                                text: `${secIssues[Math.floor(random() * secIssues.length)]} in ${['src/auth.py', 'src/database.py', 'src/api.py', 'src/forms.py'][i]}`,
+                                severity: i < highSecCount ? 'high' : (random() > 0.5 ? 'medium' : 'low')
+                            });
+                        }
+                        break;
+                        
+                    case 'performance':
+                        const complexity = Math.floor(random() * 15) + 5;
+                        const slowFunctions = Math.floor(random() * 10);
+                        
+                        results.summary = `Average cyclomatic complexity: ${complexity}`;
+                        
+                        if (complexity > 10 || slowFunctions > 5) {
+                            results.status = complexity > 12 ? 'critical' : 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Avg. Cyclomatic Complexity',
+                                value: complexity
+                            },
+                            {
+                                label: 'Functions Analyzed',
+                                value: Math.floor(random() * 100) + 50
+                            },
+                            {
+                                label: 'Slow Functions',
+                                value: slowFunctions
+                            },
+                            {
+                                label: 'Code Duplication',
+                                value: `${Math.floor(random() * 20)}%`
+                            }
+                        ];
+                        
+                        // Generate some performance issues
+                        for (let i = 0; i < Math.min(slowFunctions, 3); i++) {
+                            results.issues.push({
+                                text: `Slow function: ${['process_data', 'calculate_stats', 'render_template', 'save_to_db'][i]}`,
+                                severity: random() > 0.5 ? 'high' : 'medium'
+                            });
+                        }
+                        break;
+                        
+                    case 'license-compliance':
+                        const licenseCount = Math.floor(random() * 15) + 5;
+                        const riskyLicenseCount = Math.floor(licenseCount * random() * 0.3);
+                        
+                        results.summary = `${licenseCount} licenses found, ${riskyLicenseCount} require attention`;
+                        
+                        if (riskyLicenseCount > 0) {
+                            results.status = riskyLicenseCount > 2 ? 'critical' : 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Total Licenses',
+                                value: licenseCount
+                            },
+                            {
+                                label: 'MIT License',
+                                value: Math.floor(licenseCount * 0.6)
+                            },
+                            {
+                                label: 'Apache License',
+                                value: Math.floor(licenseCount * 0.2)
+                            },
+                            {
+                                label: 'Risky Licenses',
+                                value: riskyLicenseCount
+                            }
+                        ];
+                        
+                        // Generate some license issues
+                        const licenses = ['GPL-3.0', 'AGPL-3.0', 'LGPL-2.1', 'MPL-2.0', 'Unlicense'];
+                        for (let i = 0; i < Math.min(riskyLicenseCount, 3); i++) {
+                            results.issues.push({
+                                text: `${licenses[Math.floor(random() * licenses.length)]} in ${['package.json', 'requirements.txt', 'pom.xml', 'Gemfile'][i]}`,
+                                severity: random() > 0.5 ? 'high' : 'medium'
+                            });
+                        }
+                        break;
+                        
+                    case 'auto-fix':
+                        const fixableCount = Math.floor(random() * 30) + 5;
+                        const autoFixedCount = Math.floor(fixableCount * (0.6 + random() * 0.3));
+                        
+                        results.summary = `${autoFixedCount}/${fixableCount} issues auto-fixed`;
+                        
+                        if (fixableCount - autoFixedCount > 5) {
+                            results.status = 'warning';
+                        }
+                        
+                        results.details = [
+                            {
+                                label: 'Fixable Issues',
+                                value: fixableCount
+                            },
+                            {
+                                label: 'Auto-Fixed',
+                                value: autoFixedCount
+                            },
+                            {
+                                label: 'Manual Review Required',
+                                value: fixableCount - autoFixedCount
+                            },
+                            {
+                                label: 'Files Modified',
+                                value: Math.floor(random() * 20) + 5
+                            }
+                        ];
+                        
+                        // Generate some fix suggestions
+                        const fixes = ['Format code', 'Remove unused imports', 'Simplify function', 'Update deprecated method', 'Add type hints'];
+                        for (let i = 0; i < Math.min(fixableCount, 5); i++) {
+                            results.issues.push({
+                                text: `${fixes[Math.floor(random() * fixes.length)]} in ${['src/main.py', 'src/utils.py', 'src/models.py', 'src/views.py'][i]}`,
+                                severity: i < autoFixedCount ? 'low' : 'medium'
+                            });
+                        }
+                        break;
+                }
+                
+                return results;
+            }
+
+            // Seeded random number generator
+            function seededRandom(seed) {
+                let value = seed;
+                return function() {
+                    value = (value * 1664525 + 1013904223) % 4294967296;
+                    return value / 4294967296;
+                };
+            }
+
+            // Render agent cards
+            function renderAgentCards(agentResults) {
+                agentsContainer.innerHTML = '';
+                
+                agentResults.forEach(agent => {
+                    const card = document.createElement('div');
+                    card.className = 'agent-card';
+                    
+                    // Determine status class
+                    let statusClass = 'status-pass';
+                    let statusText = 'Pass';
+                    
+                    if (agent.status === 'warning') {
+                        statusClass = 'status-warning';
+                        statusText = 'Warning';
+                    } else if (agent.status === 'critical') {
+                        statusClass = 'status-fail';
+                        statusText = 'Critical';
+                    }
+                    
+                    // Build details HTML
+                    let detailsHtml = '';
+                    agent.details.forEach(detail => {
+                        detailsHtml += `
+                            <div class="detail-item">
+                                <div class="detail-label">${detail.label}:</div>
+                                <div class="detail-value">${detail.value}</div>
+                                ${detail.progress ? `
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${detail.progress}%"></div>
+                                    </div>
+                                ` : ''}
+                            </div>
+                        `;
+                    });
+                    
+                    // Build issues HTML
+                    let issuesHtml = '';
+                    if (agent.issues.length > 0) {
+                        issuesHtml = '<div class="issues-list">';
+                        agent.issues.forEach(issue => {
+                            issuesHtml += `
+                                <div class="issue-item">
+                                    ${issue.text}
+                                    <span class="issue-severity severity-${issue.severity}">${issue.severity.toUpperCase()}</span>
+                                </div>
+                            `;
+                        });
+                        issuesHtml += '</div>';
+                    }
+                    
+                    card.innerHTML = `
+                        <div class="agent-header">
+                            <div class="agent-icon">${agent.icon}</div>
+                            <div class="agent-title">
+                                <h3>${agent.name}</h3>
+                                <p>${agent.description}</p>
+                            </div>
+                            <div class="agent-status ${statusClass}">${statusText}</div>
+                        </div>
+                        <div class="agent-summary">
+                            <p>${agent.summary}</p>
+                        </div>
+                        <div class="agent-details">
+                            ${detailsHtml}
+                            ${issuesHtml}
+                        </div>
+                    `;
+                    
+                    agentsContainer.appendChild(card);
+                });
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{% extends "dashboard/base.html" %}
+{% block content %}
+  <h2>Test Results</h2>
+  <ul>
+    {% for agent, result in results.items %}
+      <li><strong>{{ agent }}</strong>: {{ result }}</li>
+    {% endfor %}
+  </ul>
+  <a href="{% url 'download_report' %}">Download Report as PDF</a>
+{% endblock %}
